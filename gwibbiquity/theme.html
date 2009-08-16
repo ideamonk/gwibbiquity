@@ -1,0 +1,247 @@
+<html>
+<!-- 
+Gwibbiquity for Gwibber
+  inspired by Brave by Ginkyo
+    -- Abhishek Mishra <ideamonk at gmail.com>
+-->
+  <head>
+    <style>
+      body {
+        /*background: #e1e0df;*/
+        /* matched kde4 theme background: #d5dee7;*/
+        background: #cdcdcd;
+        word-break: break-word;
+        color: black;
+        font-size: 12px;
+        margin:0px;
+        padding:0px;
+      }
+      
+      a { color: blue; }
+      
+      a:hover, .time a:hover {
+        text-decoration: underline;
+      }
+
+      p { line-height: 125% }
+      
+      td { vertical-align: top; }
+
+      .message {
+	      /*border: 1px solid rgba(42, 42, 42, 1.0);*/
+        padding-top: 5px;
+      	padding-buttom: 10px;
+      	padding-left: 5px;
+      	padding-righ: 5px;
+        margin-bottom: 0px;
+        border-bottom:#cdcdcd solid 1px;
+        /*text-shadow: 1px 1px black;*/
+
+        font-family: Lucida Grande;
+        -webkit-border-radius: 0px;
+        background: -webkit-gradient(linear, left top, left 100%, from(rgba(248,248,248,1)), to(rgba(227,227,227,1)));
+      }
+
+      .message:hover {
+	      /*border: 1px solid rgba(64, 88, 113, 1.0);*/
+        background: -webkit-gradient(linear, left top, left 100%, from(rgba(241,243,255,1)), to(rgba(232,234,247,1)));
+      }
+
+      .searchresult {
+        padding: 1px;
+        -webkit-border-radius: 5px;
+        background: -webkit-gradient(linear, left top, left 220%, from(rgba(143, 6, 32, 0.8)), to(black))
+      }
+
+      .title {
+        font-size: 14px;
+        font-weight: bold;
+      }
+      .title a{
+        color:#000000;
+        text-decoration:none;
+      }
+
+      .time {
+        font-size: small;
+      }
+
+      .time a {
+        text-decoration: none;
+        color:#343434;
+      }
+
+      .text {
+        text-decoration: none;
+	      paddin-right:20px;
+      }
+
+      .imgbox {
+        width: 48px;
+        height: 48px;
+        margin-right: 5px;
+        background-image: url('');
+        background-repeat: no-repeat;
+        -webkit-border-radius: 5px;
+       
+      }
+
+      .inlinenick {
+        text-decoration: none;
+        font-weight: bold;       
+      }
+
+      .messages h1 {
+        text-align: center;
+      }
+      .message h1 a{
+        color:#000000;
+       }
+
+      .diggbox {
+        -webkit-border-radius: 5px; 
+        margin-right: 5px;
+        padding: 1px;
+        text-align: center;
+        color: black;
+        text-shadow: none;
+        background:  -webkit-gradient(linear, left top, left 220%, from(rgba(254, 240, 152, 0.9)), to(black));
+        display: none;
+      }
+
+      .diggcount {
+        font-size: large;
+      }
+
+
+
+      .unread {
+	      /*border: 1px solid rgba(64, 88, 113, 1.0);*/
+        background: -webkit-gradient(linear, left top, left 220%, from(rgba(255, 255, 255, 1)), to(rgba(246, 228, 166, 1)))
+      }
+
+      .reply {
+	      /*border: 1px solid rgba(124, 141, 33, 1.0);*/
+        background: -webkit-gradient(linear, left top, left 220%, from(rgba(255, 255, 255, 1)), to(rgba(212, 231, 181, 1)))
+      }
+
+      .private {
+	      /*border: 1px solid rgba(119, 21, 21, 1.0);*/
+        background: -webkit-gradient(linear, left top, left 220%, from(rgba(240, 225, 124, 1)), to(rgba(255, 255, 255, 1)))
+      }
+
+
+
+      .replybutton {
+        float: right;
+      }
+
+      .dupes {
+        float: right;
+      }
+
+      .toggledupe {
+        float: right;
+      }
+    </style>
+
+    <script src="jquery.js"></script>
+    <script>
+      // XXX: this is a twitter-specific hack currently...needs updating for other protocols
+      function addUserHeader(data) {
+        html = '<div id="'+ data.gId +'" class="message '+ data.username + data.protocol + ' ' + data.aId + data.bgcolor +'" title="'+ data.sender_nick +'">' +
+			'<span class="title">'+ data.sender +'</span><br /> \
+			<span class="text">'+ data.sender_followers_count +' followers</span><br /> \
+			<span class="text">'+ data.sender_location +'</span><br /> \
+			<span class="text"><a href="'+ data.external_profile_url  +'">'+ data.external_profile_url +'</a></span> \
+		</div>'
+		$(".header").html(html);
+      }
+
+      function addDiggCount(message, data) {
+        message.html('<p><span class="diggcount">' + data.diggs + '</span><br /><small>diggs</small></p>');
+        message.css('display', 'block');
+      }
+
+      function addMessage(data, msg) {
+        html = '<div id="'+ data.gId +'" class="message '+ data.username + data.protocol + ' ' + data.aId + data.bgcolor +'">' +
+          '<table><tr>' +
+            (data.image ? '<td class="imagecolumn"> \
+              <a href="'+ data.profile_url +'"> \
+                <div class="imgbox" title="'+ data.sender_nick +'" style="background-image: url('+ data.image +');"></div> \
+              </a> \
+              <br />\
+              <div class="diggbox"></div> \
+            </td>' : '') + '<td width="100%"> \
+              <p class="content"> \
+                <span class="title">'+ (data.title == undefined ? data.sender : data.title) +'</span> \
+                <span class="time"> (<a href="'+ data.url +'">'+ data.time_string +'</a>' +
+                    (data.reply_nick ? ' <a href="'+ data.reply_url +'">'+ msg.reply +' '+ data.reply_nick +'</a>' : '') +
+                    ')</span><br /> \
+                <span class="text">'+ data.html_string +'</span> \
+              </p> \
+		</td><td width="30px"> \
+			  <span class="profilebutton"> \
+			    <a href="'+ data.profile_url +'" title="User"><img src="profile.png" /></a> \
+			  </span> \
+			  <span class="replybutton">' +
+			    (data.can_thread ? '<a href="gwibber:thread/' + data.message_index + '" title="Thread" ><img src="reply.png" /></a>' : '') +
+			    '<a href="gwibber:reply/'+ data.message_index +'" title="Reply"><img src="reply.png" /></a> \
+			  </span> \
+		</td></tr> \
+          </table> \
+        </div>'
+
+        if (data.is_duplicate) {
+          $("#" + data.gId + " .dupes:first").append(html);
+          $("#" + data.gId + " .toggledupe:first").show(0).unbind().toggle(
+            function() {$(this).parent().find(".dupes").show(100)},
+            function() {$(this).parent().find(".dupes").hide(100)});
+        } else $(".messages").append(html);
+
+        if (data.protocol == "digg")
+          addDiggCount($(".diggbox:last"), data);
+
+        if (data.is_unread)
+          $(".message:last").addClass("unread");          
+
+        if (data.is_reply)
+          $(".message:last").addClass("reply");
+
+        if (data.is_private)
+          $(".message:last").addClass("private");
+      }
+
+      function addMessages(messages, msg) {
+        clearMessages()
+        $.each(messages, function() {addMessage(this, msg)});
+      }
+
+      function clearMessages() {
+        $(".messages").html("");
+      }
+
+      function setAccountConfig(data) {
+        $.each(data, function() {
+          for (var conf in this) {
+            if (conf.search("color") > 0)
+              setMessageColor(this.id, conf, this[conf].red, this[conf].green, this[conf].blue, 0.6);
+          }
+        });
+      }
+
+      function setGtkConfig(data) {
+
+      }
+
+      function setMessageColor(aId, colorName, r, g, b, a) {
+      }
+    </script>
+  </head>
+  <body>
+    <div class="header">
+    </div>
+    <div class="messages">
+    </div>
+  </body>
+</html>
